@@ -3,8 +3,12 @@
  */
 package twitter;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.time.Instant;
 
 /**
  * Extract consists of methods that extract information from a list of tweets.
@@ -24,7 +28,24 @@ public class Extract {
      *         every tweet in the list.
      */
     public static Timespan getTimespan(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+    	
+    	if (tweets.isEmpty())
+    		return new Timespan(Instant.now(), Instant.now());
+    	
+    	Instant start = tweets.get(0).getTimestamp();
+    	Instant end = tweets.get(0).getTimestamp();
+    	
+    	for (Tweet tweet : tweets) {
+    		if (tweet.getTimestamp().isBefore(start))
+    			start = tweet.getTimestamp();
+    		
+    		if (tweet.getTimestamp().isAfter(end))
+    			end = tweet.getTimestamp();
+    	}
+    	
+    	Timespan span = new Timespan(start, end);
+    	
+    	return span;
     }
 
     /**
@@ -43,7 +64,27 @@ public class Extract {
      *         include a username at most once.
      */
     public static Set<String> getMentionedUsers(List<Tweet> tweets) {
-        throw new RuntimeException("not implemented");
+    	
+    	Set<String> mentionedUsers = new HashSet<>();
+    	if (tweets.isEmpty())
+    		return mentionedUsers;
+    	
+        Pattern pattern = Pattern.compile("(?<!\\w)@(\\w+)(?!\\w)");
+
+        for (Tweet tweet : tweets) {
+            Matcher matcher = pattern.matcher(tweet.getText());
+            while (matcher.find()) {
+                mentionedUsers.add(matcher.group(1).toLowerCase());
+            }
+        }
+
+        return mentionedUsers;
+
     }
 
-}
+} 
+
+
+
+
+

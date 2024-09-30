@@ -3,6 +3,7 @@
  */
 package twitter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -26,10 +27,23 @@ public class Filter {
      * @return all and only the tweets in the list whose author is username,
      *         in the same order as in the input list.
      */
-    public static List<Tweet> writtenBy(List<Tweet> tweets, String username) {
-        throw new RuntimeException("not implemented");
-    }
+	 public static List<Tweet> writtenBy(List<Tweet> tweets, String username) {
+        if (tweets.isEmpty()) {
+            return new ArrayList<>(); // Return empty list if no tweets
+        }
+         
+        List<Tweet> userTweets = new ArrayList<>();
+        String lowerCaseUsername = username.toLowerCase(); // Normalize case
 
+        for (Tweet tweet : tweets) {
+            if (tweet.getAuthor().toLowerCase().equals(lowerCaseUsername)) {
+                userTweets.add(tweet);
+            }
+        }
+
+        return userTweets;
+    } 
+	 
     /**
      * Find tweets that were sent during a particular timespan.
      * 
@@ -40,8 +54,22 @@ public class Filter {
      * @return all and only the tweets in the list that were sent during the timespan,
      *         in the same order as in the input list.
      */
-    public static List<Tweet> inTimespan(List<Tweet> tweets, Timespan timespan) {
-        throw new RuntimeException("not implemented");
+	 public static List<Tweet> inTimespan(List<Tweet> tweets, Timespan timespan) {
+        List<Tweet> tweetsInTimespan = new ArrayList<>();
+
+        for (Tweet tweet : tweets) {
+            if (tweet.getTimestamp().isAfter(timespan.getStart())
+                && tweet.getTimestamp().isBefore(timespan.getEnd())) {
+                tweetsInTimespan.add(tweet);
+            }
+            // Also include tweets that match the exact start or end
+            if (tweet.getTimestamp().equals(timespan.getStart()) 
+                || tweet.getTimestamp().equals(timespan.getEnd())) {
+                tweetsInTimespan.add(tweet);
+            }
+        }
+
+        return tweetsInTimespan;
     }
 
     /**
@@ -59,8 +87,24 @@ public class Filter {
      *         so "Obama" is the same as "obama".  The returned tweets are in the
      *         same order as in the input list.
      */
-    public static List<Tweet> containing(List<Tweet> tweets, List<String> words) {
-        throw new RuntimeException("not implemented");
+	 
+	 public static List<Tweet> containing(List<Tweet> tweets, List<String> words) {
+        List<Tweet> matchingTweets = new ArrayList<>();
+        if (words.isEmpty()) {
+            return matchingTweets; // Return empty list if no words are provided
+        }
+
+        for (Tweet tweet : tweets) {
+            String tweetText = tweet.getText().toLowerCase(); // Normalize tweet text
+            for (String word : words) {
+                if (tweetText.contains(word.toLowerCase())) {
+                    matchingTweets.add(tweet);
+                    break; // Stop checking once we find a match
+                }
+            }
+        }
+
+        return matchingTweets;
     }
 
 }
